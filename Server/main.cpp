@@ -12,7 +12,7 @@ int main()
 
 	Lobby lobby;
 	
-	lobby.RUN();
+	lobby.Run();
 
 	return 0;
 }

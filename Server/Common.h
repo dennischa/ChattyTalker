@@ -4,7 +4,7 @@
 
 void ErrorHandling(const char* message, SOCKET* socket = nullptr);
 
-enum STATE
+enum State
 {
 	RUNNING,
 	STOPPED

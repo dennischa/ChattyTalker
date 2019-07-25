@@ -7,10 +7,10 @@ Lobby::Lobby()
 
 Lobby::~Lobby()
 {
-	STOP();
+	Stop();
 }
 
-void Lobby::RUN()
+void Lobby::Run()
 {
 	lobby_state_ = RUNNING;
 	lobby_sock_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -52,12 +52,14 @@ void Lobby::RUN()
 		printf("Connected %s\n", addr_in);
 
 		//클라이언트랑 대화하는 쓰레드 생성
+		std::thread lobby_chat([&]() {LobbyChat(accp_sock); });
+		lobby_chat.detach();
 	}
 
 	lobby_state_ = STOPPED;
 }
 
-void Lobby::STOP()
+void Lobby::Stop()
 {
 	if (lobby_state_ == RUNNING)
 	{
@@ -73,3 +75,25 @@ void Lobby::STOP()
 	}
 }
 
+void Lobby::LobbyChat(SOCKET socket)
+{
+	char message[100];
+	while (true)
+	{
+		memset(message, 0, 100);
+		int r = recv(socket, message, 100, 0);
+
+		if (r <= 0)
+		{
+			printf("connection close");
+			
+			std::map<SOCKET, SOCKADDR_IN>::iterator it = clnt_socks_.find(socket);
+			if (it != clnt_socks_.end())
+				clnt_socks_.erase(it);
+
+			return;
+		}
+
+		printf("%s\n", message);
+	}
+}

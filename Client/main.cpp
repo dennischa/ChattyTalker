@@ -42,9 +42,13 @@ int main()
 
 	char message[100];
 
-	recv(clnt_socket, message, 100, 0);
-	
-	cout << message << endl;
+	while (true)
+	{
+		cin.getline(message, 100);
+
+
+		send(clnt_socket, message, 100, 0);
+	}
 
 	WSACleanup();
 	return 0;
