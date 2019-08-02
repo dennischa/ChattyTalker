@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <ItemsProjectGuid>{5a3a2c06-fc0e-4172-9df8-b0ab0d2aa3f6}</ItemsProjectGuid>
+    <ItemsProjectGuid>{8d7fdb22-2071-426f-a911-618fd7d80fd3}</ItemsProjectGuid>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -15,9 +15,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)ChatPacket.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Common.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)ChatPacket.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)CommonType.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common.h" />
   </ItemGroup>
 </Project>

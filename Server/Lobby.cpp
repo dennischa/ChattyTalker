@@ -1,46 +1,39 @@
-#include "Lobby.h"
+#include "Server.h"
 
 Lobby::Lobby()
 {
-	lobby_state_ = STOPPED;
-}
+	serv_sock_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (serv_sock_ == INVALID_SOCKET)
+	{
+		ErrorHandling("Lobby: Invalid lobby socket", &serv_sock_);
+	}
 
-Lobby::~Lobby()
-{
-	Stop();
-}
+	memset(&serv_addr_, 0, sizeof(serv_addr_));
 
+	serv_addr_.sin_family = AF_INET;
+	serv_addr_.sin_port = htons(LOBBY_PORT);
+	serv_addr_.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+}
 void Lobby::Run()
 {
-	lobby_state_ = RUNNING;
-	lobby_sock_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (lobby_sock_ == INVALID_SOCKET)
+	serv_state_ = RUNNING;
+
+	if (bind(serv_sock_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_)) == SOCKET_ERROR)
 	{
-		ErrorHandling("Lobby: Invalid lobby socket", &lobby_sock_);
+		ErrorHandling("Lobby: Binding lobby socket failed", &serv_sock_);
 	}
 
-	memset(&lobby_addr_, 0, sizeof(lobby_addr_));
-
-	lobby_addr_.sin_family = AF_INET;
-	lobby_addr_.sin_port = htons(LOBBY_PORT);
-	lobby_addr_.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
-
-	if (bind(lobby_sock_, (SOCKADDR*)& lobby_addr_, sizeof(lobby_addr_)) == SOCKET_ERROR)
+	if (listen(serv_sock_, SOMAXCONN) == SOCKET_ERROR)
 	{
-		ErrorHandling("Lobby: Binding lobby socket failed", &lobby_sock_);
+		ErrorHandling("Lobby: Listening lobby socket failed", &serv_sock_);
 	}
 
-	if (listen(lobby_sock_, SOMAXCONN) == SOCKET_ERROR)
-	{
-		ErrorHandling("Lobby: Listening lobby socket failed", &lobby_sock_);
-	}
-
-	while (lobby_state_ == RUNNING)
+	while (serv_state_ == RUNNING)
 	{
 		SOCKET accp_sock;
 		SOCKADDR_IN clnt_addr;
 
-		accp_sock = accept(lobby_sock_, (SOCKADDR*)& clnt_addr, nullptr);
+		accp_sock = accept(serv_sock_, (SOCKADDR*)& clnt_addr, nullptr);
 		if (accp_sock == INVALID_SOCKET)
 		{
 			ErrorHandling("Lobby: Invalid accp_socket", &accp_sock);
@@ -52,40 +45,25 @@ void Lobby::Run()
 		printf("Connected %s\n", addr_in);
 
 		//클라이언트랑 대화하는 쓰레드 생성
-		std::thread lobby_chat([&]() {LobbyChat(accp_sock); });
+		std::thread lobby_chat([&]() {Chat(accp_sock); });
 		lobby_chat.detach();
 	}
-
-	lobby_state_ = STOPPED;
 }
 
-void Lobby::Stop()
+
+void Lobby::Chat(SOCKET socket)
 {
-	if (lobby_state_ == RUNNING)
-	{
-		closesocket(lobby_sock_);
+	char buf[MAX_PACKET_SIZE];
 
-		std::map<SOCKET, SOCKADDR_IN>::iterator index = clnt_socks_.begin();
-		for (; index != clnt_socks_.end(); index++)
-		{
-			closesocket((*index).first);
-		}
-
-		lobby_state_ = STOPPED;
-	}
-}
-
-void Lobby::LobbyChat(SOCKET socket)
-{
-	char message[100];
 	while (true)
 	{
-		memset(message, 0, 100);
-		int r = recv(socket, message, 100, 0);
+		memset(buf, 0, MAX_PACKET_SIZE);
+
+		int r = recv(socket, buf, MAX_PACKET_SIZE, 0);
 
 		if (r <= 0)
 		{
-			printf("connection close");
+			printf("Lobby: connection close\n");
 			
 			std::map<SOCKET, SOCKADDR_IN>::iterator it = clnt_socks_.find(socket);
 			if (it != clnt_socks_.end())
@@ -94,6 +72,47 @@ void Lobby::LobbyChat(SOCKET socket)
 			return;
 		}
 
-		printf("%s\n", message);
+		ChatPacket* chat_packet = (ChatPacket*)buf;
+
+		if (chat_packet->get_packet_type() == JOIN)
+		{
+			JoinPacket* join_packet = (JoinPacket*)buf;
+			RoomType room_type = join_packet->get_room_type();
+
+			printf("Lobby : Join ");
+			switch (room_type)
+			{
+			case BLOCK_UDP:
+			{
+				//make udp serv
+				if (chat_rooms_.find(BLOCK_UDP) == chat_rooms_.end())
+				{
+					chat_rooms_[BLOCK_UDP] = new BlockUdpServ;
+					std::thread chat([&]() {chat_rooms_[BLOCK_UDP]->Run(); });
+					chat.detach();
+				}
+				BlockUdpServ* serv = (BlockUdpServ*)chat_rooms_[BLOCK_UDP];
+
+				printf("Host Packet Port number : %d\n", serv->get_serv_addr().sin_port);
+				//send host info
+				HostInfoPacket host_info_packet(serv->get_serv_addr(), BLOCK_UDP);
+				send(socket, (char*)&host_info_packet, sizeof(host_info_packet), 0);
+
+				//Join
+				serv->Join(clnt_socks_[socket]);
+				break;
+			}
+			/*case BLOCK_TCP:
+				break;
+			case NONBLOCK_UDP:
+				break;
+			case NONBLOCK_TCP:
+				break;*/
+			}
+		}
+		else
+		{
+			//에러 메세지
+		}
 	}
 }

@@ -1,5 +1,4 @@
-﻿#include "Common.h"
-#include "Lobby.h"
+﻿#include "Server.h"
 
 int main()
 {

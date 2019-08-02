@@ -1,55 +1,38 @@
 ﻿#include <WS2tcpip.h>
-#include <WinSock2.h>
 #include <iostream>
+#include "Common.h"
+#include "Client.h"
+#include "ChatPacket.h"
 
-using namespace std;
+void ShowGuide();
 
 int main()
 {
 	WSADATA wsadata;
-	SOCKET clnt_socket;
-	SOCKADDR_IN serv_addr;
-
-	int strLen;
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsadata) != NO_ERROR)
 	{
-		cout << "WSAStartup error" << endl;
-		return -1;
+		ErrorHandling("WSAStartup 2.2 failed");
 	}
+	ShowGuide();
 
-	clnt_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (clnt_socket == INVALID_SOCKET)
-	{
-		cout << "Invalid socket" << endl;
-		WSACleanup();
-		return -1;
-	}
-
-	memset(&serv_addr, 0, sizeof(serv_addr));
-
-	serv_addr.sin_family = AF_INET;
-	inet_pton(AF_INET, "127.0.0.1",&serv_addr.sin_addr.S_un.S_addr);
-	serv_addr.sin_port = htons(4000); //임의 포트 번호 4000
-
-	if (connect(clnt_socket, (SOCKADDR*)& serv_addr, sizeof(serv_addr)) == SOCKET_ERROR)
-	{
-		cout << "connecting socking failed : "  << WSAGetLastError() << endl;
-		closesocket(clnt_socket);
-		WSACleanup();
-		return -1;
-	}
-
-	char message[100];
-
-	while (true)
-	{
-		cin.getline(message, 100);
-
-
-		send(clnt_socket, message, 100, 0);
-	}
-
+	LobbyClient lobby_clnt;
+	lobby_clnt.Connect();
+	lobby_clnt.Chat();
+	
 	WSACleanup();
 	return 0;
+}
+
+void ShowGuide()
+{
+	std::string in_line;
+	std::ifstream in("guide.txt");
+
+	while (std::getline(in, in_line))
+	{
+		std::cout << in_line << std::endl;
+	}
+
+	in.close();
 }
