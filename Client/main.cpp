@@ -4,7 +4,7 @@
 #include "Client.h"
 #include "ChatPacket.h"
 
-void ShowGuide();
+
 
 int main()
 {
@@ -14,7 +14,6 @@ int main()
 	{
 		ErrorHandling("WSAStartup 2.2 failed");
 	}
-	ShowGuide();
 
 	LobbyClient lobby_clnt;
 	lobby_clnt.Connect();
@@ -22,17 +21,4 @@ int main()
 	
 	WSACleanup();
 	return 0;
-}
-
-void ShowGuide()
-{
-	std::string in_line;
-	std::ifstream in("guide.txt");
-
-	while (std::getline(in, in_line))
-	{
-		std::cout << in_line << std::endl;
-	}
-
-	in.close();
 }

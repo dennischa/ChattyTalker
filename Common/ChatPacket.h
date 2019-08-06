@@ -8,7 +8,8 @@ enum PacketType
 	MESSAGE = 1,
 	JOIN = 2,
 	LEAVE = 3,
-	HOST_INFO =4
+	HOST_INFO =4,
+	PacketTypeCount
 };
 
 enum RoomType
@@ -34,7 +35,7 @@ private:
 class MessagePacket : public ChatPacket
 {
 public:
-	MessagePacket(char* c);
+	MessagePacket(const char* c);
 	char* get_message() { return message_; }
 private:
 	char message_[MAX_MESSAGE_SIZE];
@@ -59,3 +60,5 @@ private:
 	SOCKADDR_IN host_addr_;
 	RoomType room_type_;
 };
+
+bool GetPacketType(char* buf, PacketType& packet_type);

@@ -6,7 +6,7 @@ LobbyClient::LobbyClient()
 
 	if (clnt_socket_ == INVALID_SOCKET)
 	{
-		ErrorHandling("LobbyClient : Invalid socket ", &clnt_socket_);
+		ErrorHandling("LobbyClient : Invalid socket", &clnt_socket_);
 	}
 	inet_pton(AF_INET, Serv_IPv4_ADDR, &serv_addr_.sin_addr.S_un.S_addr);
 	serv_addr_.sin_port = htons(LOBBY_PORT);
@@ -16,7 +16,7 @@ bool LobbyClient::Connect()
 {
 	if (connect(clnt_socket_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_)) == SOCKET_ERROR)
 	{
-		ErrorHandling("Client : Connect socket error", &clnt_socket_);
+		ErrorHandling("LobbyClient : Connect socket error", &clnt_socket_);
 	}
 
 	return true;
@@ -25,6 +25,8 @@ bool LobbyClient::Connect()
 void LobbyClient::Chat()
 {
 	char message[MAX_MESSAGE_SIZE];
+
+	ShowGuide();
 
 	while (true)
 	{
@@ -60,6 +62,15 @@ void LobbyClient::Chat()
 				case BLOCK_UDP:
 				{
 					BlockUdpClient blck_udp_clnt(host_info_packet->get_host_addr());
+					SOCKADDR_IN addr;
+					int len = sizeof(addr);
+					int sockname = getsockname(blck_udp_clnt.get_clnt_socket(), (SOCKADDR*)& addr, &len);
+					if (sockname != 0)
+					{
+						ErrorHandling("udp clnt sockt addr error");
+					}
+					HostInfoPacket clnt_info(addr, BLOCK_UDP);
+					send(clnt_socket_, (char*)& clnt_info, sizeof(clnt_info), 0);
 					blck_udp_clnt.Chat();
 					break;
 				}
@@ -67,8 +78,9 @@ void LobbyClient::Chat()
 					break;
 					//so on
 				}
-
 			}
+
+			ShowGuide();
 		}
 		else
 		{

@@ -12,16 +12,16 @@ Lobby::Lobby()
 
 	serv_addr_.sin_family = AF_INET;
 	serv_addr_.sin_port = htons(LOBBY_PORT);
-	serv_addr_.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
-}
-void Lobby::Run()
-{
-	serv_state_ = RUNNING;
+	inet_pton(AF_INET, Serv_IPv4_ADDR, &serv_addr_.sin_addr.S_un.S_addr);
 
 	if (bind(serv_sock_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_)) == SOCKET_ERROR)
 	{
 		ErrorHandling("Lobby: Binding lobby socket failed", &serv_sock_);
 	}
+}
+void Lobby::Run()
+{
+	serv_state_ = RUNNING;
 
 	if (listen(serv_sock_, SOMAXCONN) == SOCKET_ERROR)
 	{
@@ -32,17 +32,17 @@ void Lobby::Run()
 	{
 		SOCKET accp_sock;
 		SOCKADDR_IN clnt_addr;
+		int addrlen = sizeof(clnt_addr);
 
-		accp_sock = accept(serv_sock_, (SOCKADDR*)& clnt_addr, nullptr);
+		accp_sock = accept(serv_sock_, (SOCKADDR*)& clnt_addr, &addrlen);
 		if (accp_sock == INVALID_SOCKET)
 		{
 			ErrorHandling("Lobby: Invalid accp_socket", &accp_sock);
 		}
 
 		clnt_socks_[accp_sock] = clnt_addr;
-		char addr_in[20];
-		inet_ntop(AF_INET, &clnt_addr.sin_addr.S_un.S_addr, addr_in, sizeof(addr_in));
-		printf("Connected %s\n", addr_in);
+		
+		printf("Lobby : Accept Client Connect : %s\n", toString(clnt_addr).c_str());
 
 		//클라이언트랑 대화하는 쓰레드 생성
 		std::thread lobby_chat([&]() {Chat(accp_sock); });
@@ -55,7 +55,7 @@ void Lobby::Chat(SOCKET socket)
 {
 	char buf[MAX_PACKET_SIZE];
 
-	while (true)
+	while (serv_state_ == RUNNING)
 	{
 		memset(buf, 0, MAX_PACKET_SIZE);
 
@@ -79,7 +79,6 @@ void Lobby::Chat(SOCKET socket)
 			JoinPacket* join_packet = (JoinPacket*)buf;
 			RoomType room_type = join_packet->get_room_type();
 
-			printf("Lobby : Join ");
 			switch (room_type)
 			{
 			case BLOCK_UDP:
@@ -92,14 +91,27 @@ void Lobby::Chat(SOCKET socket)
 					chat.detach();
 				}
 				BlockUdpServ* serv = (BlockUdpServ*)chat_rooms_[BLOCK_UDP];
+				
+				//send serv info
+				HostInfoPacket serv_info(serv->get_serv_addr(), BLOCK_UDP);
+				send(socket, (char*)& serv_info, sizeof(serv_info), 0);
 
-				printf("Host Packet Port number : %d\n", serv->get_serv_addr().sin_port);
-				//send host info
-				HostInfoPacket host_info_packet(serv->get_serv_addr(), BLOCK_UDP);
-				send(socket, (char*)&host_info_packet, sizeof(host_info_packet), 0);
+				//recv clnt info
+				memset(buf, 0, MAX_PACKET_SIZE);
+				int r = recv(socket, (char*)buf, MAX_PACKET_SIZE, 0);
+				if (r < 0)
+				{
+					ErrorHandling("Lobby BLOCK_UDP : failed recv hostInfo ");
+					return;
+				}
 
-				//Join
-				serv->Join(clnt_socks_[socket]);
+				HostInfoPacket* clnt_info = (HostInfoPacket*)buf;
+				if (clnt_info->get_packet_type() != HOST_INFO)
+				{
+					ErrorHandling("Lobby BLOCK_UDP : wrong packet type");
+				}
+
+				serv->Join(clnt_info->get_host_addr());
 				break;
 			}
 			/*case BLOCK_TCP:

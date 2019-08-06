@@ -46,6 +46,7 @@ public:
 	BlockUdpServ();
 	virtual void Run();
 	bool Join(SOCKADDR_IN addr);
+	bool Leave(SOCKADDR_IN addr);
 
 private:
 	std::vector<SOCKADDR_IN> clnt_addrs_;

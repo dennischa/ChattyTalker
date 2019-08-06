@@ -2,8 +2,11 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <thread>
 #include "Common.h"
 #include "ChatPacket.h"
+
+//#define Client_IPv4_ADDR "127.0.0.1"
 
 class Client
 {
@@ -16,6 +19,7 @@ public:
 protected:
 	SOCKET clnt_socket_;
 	SOCKADDR_IN serv_addr_;
+	SOCKADDR_IN clnt_addr_;
 };
 
 class LobbyClient : public Client
@@ -31,5 +35,7 @@ class BlockUdpClient : public Client
 public:
 	BlockUdpClient(SOCKADDR_IN serv_addr);
 	virtual void Chat();
+	void Recvfrom(bool& on_chat);
 };
 
+void ShowGuide();
