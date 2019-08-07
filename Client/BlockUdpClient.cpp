@@ -26,7 +26,7 @@ void BlockUdpClient::Chat()
 {
 	printf("BlockUdpClient::Chat() Start\n");
 	bool on_chat = true;
-	std::thread recv([&]() { Recvfrom(on_chat); });
+	std::thread recvfrom([&]() { Recvfrom(on_chat); });
 
 	char message[MAX_MESSAGE_SIZE];
 
@@ -47,7 +47,7 @@ void BlockUdpClient::Chat()
 			//The transmission is not guaranteed. because it's UDP
 			sendto(clnt_socket_, (char*)&chat_packet, sizeof(chat_packet), 0, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_));
 			closesocket(clnt_socket_);
-			recv.join();
+			recvfrom.join();
 			return;
 		}
 
@@ -59,9 +59,9 @@ void BlockUdpClient::Chat()
 
 void BlockUdpClient::Recvfrom(bool& on_chat)
 {
+	char buf[MAX_PACKET_SIZE];
 	while (on_chat)
 	{
-		char buf[MAX_PACKET_SIZE];
 		memset(buf, 0, MAX_PACKET_SIZE);
 		SOCKADDR_IN addr;
 		int addrlen = sizeof(addr);

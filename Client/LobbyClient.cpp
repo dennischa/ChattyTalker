@@ -17,6 +17,7 @@ bool LobbyClient::Connect()
 	if (connect(clnt_socket_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_)) == SOCKET_ERROR)
 	{
 		ErrorHandling("LobbyClient : Connect socket error", &clnt_socket_);
+		return false;
 	}
 
 	return true;
@@ -55,6 +56,7 @@ void LobbyClient::Chat()
 				if (type != host_info_packet->get_room_type())
 				{
 					//Error
+					ErrorHandling("LobbyClient : discordance between host types");
 				}
 
 				switch (type)
@@ -75,8 +77,9 @@ void LobbyClient::Chat()
 					break;
 				}
 				case BLOCK_TCP:
+				{
+					BlockTcpClient blck_tcp_clnt(host_info_packet->get_host_addr());
 					break;
-					//so on
 				}
 			}
 

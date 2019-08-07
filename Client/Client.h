@@ -38,4 +38,13 @@ public:
 	void Recvfrom(bool& on_chat);
 };
 
+class BlockTcpClient : public Client
+{
+public:
+	BlockTcpClient(SOCKADDR_IN serv_addr);
+	virtual bool Connect();
+	virtual void Chat();
+	void Recv(bool& on_chat);
+};
+
 void ShowGuide();
