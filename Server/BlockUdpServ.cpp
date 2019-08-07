@@ -18,7 +18,7 @@ BlockUdpServ::BlockUdpServ()
 	{
 		ErrorHandling("BlockUdpServ: Binding serv_sock failed\n", &serv_sock_);
 	}
-
+	/*
 	printf("BlockUdpServ Port Number : %d\n", serv_addr_.sin_port);
 
 	SOCKADDR_IN addr;
@@ -31,7 +31,7 @@ BlockUdpServ::BlockUdpServ()
 	else
 	{
 		printf("serv_scok name, %s\n", toString(addr).c_str());
-	}
+	}*/
 }
 
 void BlockUdpServ::Run()

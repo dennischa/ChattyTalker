@@ -6,7 +6,7 @@
 #include "Common.h"
 #include "ChatPacket.h"
 
-//#define Client_IPv4_ADDR "127.0.0.1"
+#define Clnt_IPv4_ADDR "127.0.0.1"
 
 class Client
 {

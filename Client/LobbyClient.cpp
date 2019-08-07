@@ -45,7 +45,7 @@ void LobbyClient::Chat()
 			//recv host info
 			char buf[MAX_PACKET_SIZE];
 			memset(buf, 0, MAX_PACKET_SIZE);
-			
+
 			int r = recv(clnt_socket_, buf, MAX_PACKET_SIZE, 0);
 			ChatPacket* chat_packet = (ChatPacket*)buf;
 
@@ -79,15 +79,21 @@ void LobbyClient::Chat()
 				case BLOCK_TCP:
 				{
 					BlockTcpClient blck_tcp_clnt(host_info_packet->get_host_addr());
+					if (blck_tcp_clnt.Connect())
+					{
+						blck_tcp_clnt.Chat();
+					}
 					break;
 				}
-			}
 
-			ShowGuide();
-		}
-		else
-		{
-			printf("Wrong Input\n");
+				}
+
+				ShowGuide();
+			}
+			else
+			{
+				printf("Wrong Input\n");
+			}
 		}
 	}
 }

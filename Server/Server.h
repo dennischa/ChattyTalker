@@ -5,6 +5,11 @@
 #include <Common.h>
 #include "ChatPacket.h"
 
+#define LOBBY_PORT 4000
+#define BLOCK_UDP_PORT 4100
+#define BLOCK_TCP_PORT 4200
+#define Serv_IPv4_ADDR "127.0.0.1"
+
 enum ServerState
 {
 	STOPPED = 0,
@@ -50,5 +55,13 @@ public:
 
 private:
 	std::vector<SOCKADDR_IN> clnt_addrs_;
+};
+
+class BlockTcpServ : public Server
+{
+public:
+	BlockTcpServ();
+	virtual void Run();
+	virtual void Chat(SOCKET socket);
 };
 
