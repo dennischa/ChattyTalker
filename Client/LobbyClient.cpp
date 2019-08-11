@@ -59,33 +59,67 @@ void LobbyClient::Chat()
 					ErrorHandling("LobbyClient : discordance between host types");
 				}
 
+				SOCKADDR_IN serv_addr = host_info_packet->get_host_addr();
+
 				switch (type)
 				{
 				case BLOCK_UDP:
 				{
-					BlockUdpClient blck_udp_clnt(host_info_packet->get_host_addr());
-					SOCKADDR_IN addr;
-					int len = sizeof(addr);
-					int sockname = getsockname(blck_udp_clnt.get_clnt_socket(), (SOCKADDR*)& addr, &len);
-					if (sockname != 0)
-					{
-						ErrorHandling("udp clnt sockt addr error");
-					}
+					BlockUdpClient blck_udp_clnt(serv_addr);
+					SOCKADDR_IN addr = blck_udp_clnt.get_clnt_addr();
+					
 					HostInfoPacket clnt_info(addr, BLOCK_UDP);
 					send(clnt_socket_, (char*)& clnt_info, sizeof(clnt_info), 0);
+					
 					blck_udp_clnt.Chat();
+
+					LeavePacket leave_packet(BLOCK_UDP, addr);
+					send(clnt_socket_, (char*)& leave_packet, sizeof(leave_packet), 0);
+
 					break;
 				}
 				case BLOCK_TCP:
 				{
-					BlockTcpClient blck_tcp_clnt(host_info_packet->get_host_addr());
+					BlockTcpClient blck_tcp_clnt(serv_addr);
+					
 					if (blck_tcp_clnt.Connect())
 					{
 						blck_tcp_clnt.Chat();
 					}
+
 					break;
 				}
+				case NONBLOCK_UDP:
+				{
+					NonBlockUdpClient nblck_udp_clnt(serv_addr);
+					SOCKADDR_IN addr = nblck_udp_clnt.get_clnt_addr();
 
+					HostInfoPacket clnt_info(addr, NONBLOCK_UDP);
+					send(clnt_socket_, (char*)& clnt_info, sizeof(clnt_info), 0);
+
+					nblck_udp_clnt.Chat();
+
+					LeavePacket leave_packet(NONBLOCK_UDP, addr);
+					send(clnt_socket_, (char*)& leave_packet, sizeof(leave_packet), 0);
+
+					break;
+				}
+				case NONBLOCK_TCP:
+				{
+					NonBlockTcpClient nblck_tcp_clnt(serv_addr);
+
+					if (nblck_tcp_clnt.Connect())
+					{
+						nblck_tcp_clnt.Chat();
+					}
+
+					break;
+				}
+				default:
+				{
+					ErrorHandling("LobbyClient::Chat : worng room type");
+					break;
+				}
 				}
 
 				ShowGuide();

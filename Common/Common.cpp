@@ -36,3 +36,30 @@ bool Equal(SOCKADDR_IN laddr, SOCKADDR_IN raddr)
 
 	return true;
 }
+
+bool IsWSAEWOULDBLOCK(const int result)
+{
+	if (result == SOCKET_ERROR)
+	{
+		if (WSAGetLastError() == WSAEWOULDBLOCK)
+			return true;
+		else
+			return false;
+	}
+
+	return false;
+}
+
+bool SetNonBlockMode(SOCKET& socket)
+{
+	u_long non_block_mode = 1;
+
+	int iRsult = ioctlsocket(socket, FIONBIO, &non_block_mode);
+
+	if (iRsult == SOCKET_ERROR)
+	{
+		ErrorHandling("SetNonBlockMode : ioctlsocket failed", &socket);
+	}
+
+	return true;
+}

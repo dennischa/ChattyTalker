@@ -12,16 +12,23 @@ Server::~Server()
 
 void Server::Stop()
 {
-	if (serv_state_ == RUNNING)
+	closesocket(serv_sock_);
+
+	std::map<SOCKET, SOCKADDR_IN>::iterator index = clnt_socks_.begin();
+	for (; index != clnt_socks_.end(); index++)
 	{
-		closesocket(serv_sock_);
+		closesocket((*index).first);
+	}
 
-		std::map<SOCKET, SOCKADDR_IN>::iterator index = clnt_socks_.begin();
-		for (; index != clnt_socks_.end(); index++)
+	serv_state_ = STOPPED;
+
+	for (int i = 0; i < threads.size(); i++)
+	{
+		std::thread& thread = threads.at(i);
+		if (thread.joinable())
 		{
-			closesocket((*index).first);
+			//printf("Server::Stop() Wait Thread Id : %p", thread.get_id());
+			thread.join();
 		}
-
-		serv_state_ = STOPPED;
 	}
 }

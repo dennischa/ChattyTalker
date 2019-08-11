@@ -17,6 +17,20 @@ Client::~Client()
 	closesocket(clnt_socket_);
 }
 
+SOCKADDR_IN Client::get_clnt_addr()
+{
+	SOCKADDR_IN addr;
+	int len = sizeof(addr);
+	int sockname = getsockname(clnt_socket_, (SOCKADDR*)& addr, &len);
+	
+	if (sockname != 0)
+	{
+		ErrorHandling("Client::get_clnt_addr() : getsockname failed");
+	}
+
+	return addr;
+}
+
 void ShowGuide()
 {
 	std::string in_line;

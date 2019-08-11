@@ -1,6 +1,8 @@
 #pragma once
 #include "Common.h"
+
 #define MAX_PACKET_SIZE 320
+#define MAX_MESSAGE_SIZE 300
 
 enum PacketType
 {
@@ -59,6 +61,18 @@ public:
 private:
 	SOCKADDR_IN host_addr_;
 	RoomType room_type_;
+};
+
+class LeavePacket : public ChatPacket
+{
+public:
+	LeavePacket(RoomType romm_type, SOCKADDR_IN addr) :ChatPacket(LEAVE), room_type_(romm_type), addr_(addr) {}
+	RoomType get_room_type() {	return room_type_; }
+	SOCKADDR_IN get_addr() { return addr_; }
+private:
+	RoomType room_type_;
+	SOCKADDR_IN addr_;
+
 };
 
 bool GetPacketType(char* buf, PacketType& packet_type);

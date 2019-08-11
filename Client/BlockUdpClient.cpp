@@ -15,18 +15,14 @@ BlockUdpClient::BlockUdpClient(SOCKADDR_IN serv_addr)
 	{
 		ErrorHandling("Client: binding socket failed", &clnt_socket_);
 	}
-
-	SOCKADDR_IN addr;
-	int addrlen = sizeof(addr);
-	getsockname(clnt_socket_, (SOCKADDR*)& addr, &addrlen);
-	printf("BlockUdpClient : %s\n", toString(addr).c_str());
 }
 
 void BlockUdpClient::Chat()
 {
-	printf("BlockUdpClient::Chat() Start\n");
+	//printf("BlockUdpClient::Chat() Start\n");
 	bool on_chat = true;
-	std::thread recvfrom([&]() { Recvfrom(on_chat); });
+	//std::thread recvfrom([&]() { Recvfrom(on_chat); });
+	std::thread recvfrom(&BlockUdpClient::Recvfrom, this, std::ref(on_chat));
 
 	char message[MAX_MESSAGE_SIZE];
 
@@ -38,14 +34,9 @@ void BlockUdpClient::Chat()
 		if (strlen(message) < 1)
 			continue;
 
-		//Leave 처리 필요
-
 		if (strcmp(message, "/exit") == 0)
 		{
 			on_chat = false;
-			ChatPacket chat_packet(LEAVE);
-			//The transmission is not guaranteed. because it's UDP
-			sendto(clnt_socket_, (char*)&chat_packet, sizeof(chat_packet), 0, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_));
 			closesocket(clnt_socket_);
 			recvfrom.join();
 			return;
@@ -53,7 +44,7 @@ void BlockUdpClient::Chat()
 
 		MessagePacket msg_packet(message);
 
-		sendto(clnt_socket_, (char*)&msg_packet, sizeof(msg_packet), 0, (SOCKADDR*) &serv_addr_, sizeof(serv_addr_));
+		int result = sendto(clnt_socket_, (char*)&msg_packet, sizeof(msg_packet), 0, (SOCKADDR*) &serv_addr_, sizeof(serv_addr_));
 	}
 }
 

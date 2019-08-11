@@ -159,6 +159,8 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="LobbyClient.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="NonBlockTcpClient.cpp" />
+    <ClCompile Include="NonBlockUdpClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h" />
