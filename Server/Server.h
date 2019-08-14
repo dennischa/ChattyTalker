@@ -17,77 +17,88 @@ enum ServerState
 {
 	STOPPED = 0,
 	RUNNING = 1
-	
 };
 
-class Server
+namespace ChattyTalker
 {
-public:
-	Server();
-	~Server();
-	virtual void Run() {}
-	virtual void Stop();
-	virtual void Chat(SOCKET socket) {};
-	SOCKADDR_IN get_serv_addr() { return serv_addr_; }
+	class Server
+	{
+	public:
+		Server();
+		~Server();
+		virtual void Stop();
+		virtual void Run() = 0;
+		SOCKADDR_IN get_serv_addr() { return serv_addr_; }
 
-protected:
-	SOCKET serv_sock_;
-	SOCKADDR_IN serv_addr_;
-	std::map<SOCKET, SOCKADDR_IN> clnt_socks_;
-	ServerState serv_state_;
-	std::vector<std::thread> threads;
-};
+	protected:
+		SOCKET serv_sock_;
+		SOCKADDR_IN serv_addr_;
+		ServerState serv_state_;
+		std::vector<std::thread> threads;
+	};
 
-class Lobby : public Server
-{
-public:
-	Lobby();
-	virtual void Run();
-	virtual void Chat(SOCKET socket);
-	Server* FindChatroom(RoomType room_type);
+	class TcpServer : public Server
+	{
+	public:
+		TcpServer();
+		virtual void Stop();
+		virtual void Chat(SOCKET socket = NULL) = 0;
+	protected:
+		std::map<SOCKET, SOCKADDR_IN> clnt_socks_;
+	};
 
-private:
-	std::map<RoomType, Server*> chat_rooms_;
-};
+	class UdpServer : public Server
+	{
+	public:
+		UdpServer();
+		virtual bool Join(SOCKADDR_IN addr);
+		virtual bool Leave(SOCKADDR_IN addr);
+	protected:
+		std::vector<SOCKADDR_IN> clnt_addrs_;
+	};
 
-class BlockUdpServ : public Server
-{
-public:
-	BlockUdpServ();
-	virtual void Run();
-	 bool Join(SOCKADDR_IN addr);
-	bool Leave(SOCKADDR_IN addr);
+	class Lobby : public TcpServer
+	{
+	public:
+		Lobby();
+		virtual void Run();
+		virtual void Chat(SOCKET socket);
+		ChattyTalker::Server* FindChatroom(RoomType room_type);
 
-private:
-	std::vector<SOCKADDR_IN> clnt_addrs_;
-};
+	private:
+		std::map<RoomType, ChattyTalker::Server*> chat_rooms_;
+	};
 
-class BlockTcpServ : public Server
-{
-public:
-	BlockTcpServ();
-	virtual void Run();
-	virtual void Chat(SOCKET socket);
-};
+	class BlockUdpServ : public UdpServer
+	{
+	public:
+		BlockUdpServ();
+		virtual void Run();
+	};
 
-class NonBlockUdpServ : public BlockUdpServ
-{
-public:
-	NonBlockUdpServ();
-	virtual void Run();
-	bool Join(SOCKADDR_IN addr);
-	bool Leave(SOCKADDR_IN addr);
+	class BlockTcpServ : public TcpServer
+	{
+	public:
+		BlockTcpServ();
+		virtual void Run();
+		virtual void Chat(SOCKET socket);
+	};
 
-private:
-	std::vector<SOCKADDR_IN> clnt_addrs_;
-};
+	class NonBlockUdpServ : public UdpServer
+	{
+	public:
+		NonBlockUdpServ();
+		void Run();
+	};
 
-class NonBlockTcpServ : public Server
-{
-public:
-	NonBlockTcpServ();
-	virtual void Run();
-	void Chat();
-	int Select();
-	void Send(SOCKET& socket, char* buf);
-};
+	class NonBlockTcpServ : public TcpServer
+	{
+	public:
+		NonBlockTcpServ();
+		virtual void Run();
+		virtual void Chat(SOCKET socke);
+		int Select();
+		void Send(SOCKET& socket, char* buf);
+	};
+}
+

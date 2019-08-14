@@ -163,6 +163,8 @@
     <ClCompile Include="NonBlockTcpServ.cpp" />
     <ClCompile Include="NonBlockUdpServ.cpp" />
     <ClCompile Include="Server.cpp" />
+    <ClCompile Include="TcpServer.cpp" />
+    <ClCompile Include="UdpServer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Server.h" />

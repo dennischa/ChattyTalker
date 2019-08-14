@@ -36,6 +36,12 @@
     <ClCompile Include="NonBlockTcpServ.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="TcpServer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="UdpServer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Server.h">

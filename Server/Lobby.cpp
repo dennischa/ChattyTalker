@@ -1,24 +1,17 @@
 #include "Server.h"
 
+using namespace ChattyTalker;
+
 Lobby::Lobby()
 {
-	serv_sock_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (serv_sock_ == INVALID_SOCKET)
-	{
-		ErrorHandling("Lobby: Invalid lobby socket", &serv_sock_);
-	}
-
-	memset(&serv_addr_, 0, sizeof(serv_addr_));
-
-	serv_addr_.sin_family = AF_INET;
 	serv_addr_.sin_port = htons(LOBBY_PORT);
-	inet_pton(AF_INET, Serv_IPv4_ADDR, &serv_addr_.sin_addr.S_un.S_addr);
 
 	if (bind(serv_sock_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_)) == SOCKET_ERROR)
 	{
 		ErrorHandling("Lobby: Binding lobby socket failed", &serv_sock_);
 	}
 }
+
 void Lobby::Run()
 {
 	serv_state_ = RUNNING;
@@ -51,7 +44,6 @@ void Lobby::Run()
 		//lobby_chat.detach();
 	}
 }
-
 
 void Lobby::Chat(SOCKET socket)
 {
@@ -100,8 +92,8 @@ void Lobby::Chat(SOCKET socket)
 					ErrorHandling("Lobby::Chat : must be HostInfo type");
 				}
 
-				BlockUdpServ* blck_udp = (BlockUdpServ*)serv;
-				blck_udp->Join(clnt_info->get_host_addr());
+				UdpServer* udp = (UdpServer*)serv;
+				udp->Join(clnt_info->get_host_addr());
 				break;
 			}
 			case BLOCK_TCP:
@@ -113,30 +105,6 @@ void Lobby::Chat(SOCKET socket)
 
 				break;
 			}
-			/*case NONBLOCK_UDP:
-			{
-				HostInfoPacket serv_info(serv->get_serv_addr(), NONBLOCK_UDP);
-				send(socket, (char*)& serv_info, sizeof(serv_info), 0);
-
-				memset(buf, 0, MAX_PACKET_SIZE);
-				int r = recv(socket, (char*)buf, MAX_PACKET_SIZE, 0);
-				if (r < 0)
-				{
-					ErrorHandling("Lobby NONBLOCK_UDP : failed recv hostInfo ");
-					return;
-				}
-
-				HostInfoPacket* clnt_info = (HostInfoPacket*)buf;
-				if (clnt_info->get_packet_type() != HOST_INFO)
-				{
-					ErrorHandling("Lobby BLOCK_UDP : wrong packet type");
-				}
-
-				NonBlockUdpServ* nblck_udp = (NonBlockUdpServ*)serv;
-				nblck_udp->Join(clnt_info->get_host_addr());
-
-				break;
-			}*/
 			default:
 			{
 				ErrorHandling("Lobby::Run : wrong room type");
@@ -191,6 +159,8 @@ Server* Lobby::FindChatroom(const RoomType room_type)
 		case NONBLOCK_UDP:
 			server = new NonBlockUdpServ;
 			break;
+		case NONBLOCK_TCP:
+			server = new NonBlockTcpServ;
 		default:
 			ErrorHandling("Lobby::FindChatroom : Add Chat Room Type");
 			break;

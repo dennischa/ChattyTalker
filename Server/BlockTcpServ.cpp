@@ -1,18 +1,10 @@
 #include "Server.h"
 
+using namespace ChattyTalker;
+
 BlockTcpServ::BlockTcpServ()
 {
-	serv_sock_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (serv_sock_ == INVALID_SOCKET)
-	{
-		ErrorHandling("BlockTcpServ: Invalid serv_sock", &serv_sock_);
-	}
-
-	memset(&serv_addr_, 0, sizeof(serv_addr_));
-
-	serv_addr_.sin_family = AF_INET;
 	serv_addr_.sin_port = htons(BLOCK_TCP_PORT);
-	inet_pton(AF_INET, Serv_IPv4_ADDR, &serv_addr_.sin_addr.S_un.S_addr);
 
 	if (bind(serv_sock_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_)) == SOCKET_ERROR)
 	{

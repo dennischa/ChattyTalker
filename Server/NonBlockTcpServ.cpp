@@ -1,18 +1,10 @@
 #include "Server.h"
 
+using namespace ChattyTalker;
+
 NonBlockTcpServ::NonBlockTcpServ()
 {
-	serv_sock_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (serv_sock_ == INVALID_SOCKET)
-	{
-		ErrorHandling("NonBlockTcpServ: Invalid serv_sock", &serv_sock_);
-	}
-
-	memset(&serv_addr_, 0, sizeof(serv_addr_));
-
-	serv_addr_.sin_family = AF_INET;
 	serv_addr_.sin_port = htons(NBLOCK_TCP_PORT);
-	inet_pton(AF_INET, Serv_IPv4_ADDR, &serv_addr_.sin_addr.S_un.S_addr);
 
 	if (bind(serv_sock_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_)) == SOCKET_ERROR)
 	{
@@ -31,7 +23,7 @@ void NonBlockTcpServ::Run()
 		ErrorHandling("NonBlockTcpServ: Listening serv_socket failed", &serv_sock_);
 	}
 
-	std::thread chat(&NonBlockTcpServ::Chat, this);
+	std::thread chat(&NonBlockTcpServ::Chat, this, NULL);
 
 	while (serv_state_ == RUNNING)
 	{
@@ -67,8 +59,9 @@ void NonBlockTcpServ::Run()
 		chat.join();
 }
 
-void NonBlockTcpServ::Chat()
+void NonBlockTcpServ::Chat(SOCKET socket)
 {
+	//don't use socket
 	char buf[MAX_PACKET_SIZE];
 	std::map<SOCKET, SOCKADDR_IN>::iterator it;
 

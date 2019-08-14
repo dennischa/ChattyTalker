@@ -1,4 +1,5 @@
 ﻿#include "Server.h"
+using namespace ChattyTalker;
 
 int main()
 {
