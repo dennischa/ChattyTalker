@@ -12,6 +12,16 @@ Lobby::Lobby()
 	}
 }
 
+Lobby::~Lobby()
+{
+	std::map<RoomType, ChattyTalker::Server*>::iterator it = chat_rooms_.begin();
+
+	for (; it != chat_rooms_.end(); it++)
+	{
+		delete it->second;
+	}
+}
+
 void Lobby::Run()
 {
 	serv_state_ = RUNNING;
@@ -161,6 +171,7 @@ Server* Lobby::FindChatroom(const RoomType room_type)
 			break;
 		case NONBLOCK_TCP:
 			server = new NonBlockTcpServ;
+			break;
 		default:
 			ErrorHandling("Lobby::FindChatroom : Add Chat Room Type");
 			break;

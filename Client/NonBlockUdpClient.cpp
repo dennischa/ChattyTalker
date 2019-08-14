@@ -1,21 +1,7 @@
 #include "Client.h"
 
-NonBlockUdpClient::NonBlockUdpClient(SOCKADDR_IN serv_addr)
+NonBlockUdpClient::NonBlockUdpClient(SOCKADDR_IN serv_addr):UdpClient(serv_addr)
 {
-	clnt_socket_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-
-	if (clnt_socket_ == INVALID_SOCKET)
-	{
-		ErrorHandling("NonBlockUdpClient : Invalid clnt_sock_ ", &clnt_socket_);
-	}
-
-	serv_addr_ = serv_addr;
-
-	if (bind(clnt_socket_, (SOCKADDR*)& clnt_addr_, sizeof(clnt_addr_)) == SOCKET_ERROR)
-	{
-		ErrorHandling("Client: binding socket failed", &clnt_socket_);
-	}
-
 	SetNonBlockMode(clnt_socket_);
 }
 

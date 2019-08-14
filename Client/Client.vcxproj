@@ -161,6 +161,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NonBlockTcpClient.cpp" />
     <ClCompile Include="NonBlockUdpClient.cpp" />
+    <ClCompile Include="TcpClient.cpp" />
+    <ClCompile Include="UdpClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h" />

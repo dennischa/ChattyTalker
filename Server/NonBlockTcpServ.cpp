@@ -52,7 +52,7 @@ void NonBlockTcpServ::Run()
 
 		clnt_socks_[accp_sock] = clnt_addr;
 
-		printf("BlockTcpServ : Accept Client Connect : %s\n", toString(clnt_addr).c_str());
+		printf("NonBlockTcpServ : Accept Client Connect : %s\n", toString(clnt_addr).c_str());
 	}
 
 	if (chat.joinable())
@@ -78,7 +78,7 @@ void NonBlockTcpServ::Chat(SOCKET socket)
 		}
 		else if(select_num < 0)
 		{
-			ErrorHandling(" NonBlockTcpServ::Chat : select failed");
+			ErrorHandling("NonBlockTcpServ::Chat : select failed");
 		}
 
 
@@ -90,21 +90,21 @@ void NonBlockTcpServ::Chat(SOCKET socket)
 
 			int result = recv(socket, buf, MAX_PACKET_SIZE, 0);
 
-			if(result > 0)
+			if(result > 0) //recv message
 			{
 				select_num--;
 				Send(socket, buf);
 			}
-			else if(result == 0)
+			else if(result == 0) //close connection
 			{
 				select_num--;
 				clnt_socks_.erase(it);
 			}
-			else if (IsWSAEWOULDBLOCK(result))
+			else if (IsWSAEWOULDBLOCK(result)) //would block
 			{
 				continue;
 			}
-			else
+			else //error
 			{
 				ErrorHandling("NonBlockTcpServ::Chat : recv failed");
 			}
@@ -123,15 +123,17 @@ int NonBlockTcpServ::Select()
 	time.tv_sec = 1;
 
 	std::map<SOCKET, SOCKADDR_IN>::iterator it = clnt_socks_.begin();
-	
 
 	for (; it != clnt_socks_.end(); it++)
 	{
 		FD_SET(it->first, &set);
 	}
 
-	return select(0, &set, nullptr, nullptr, &time);
+	if (set.fd_count == 0)
+		return 0;
 
+	return select(0, &set, nullptr, nullptr, &time);
+	// 0:timeout, <0:error, >0:okay
 }
 
 void NonBlockTcpServ::Send(SOCKET& socket, char* buf)

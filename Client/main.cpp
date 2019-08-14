@@ -4,8 +4,6 @@
 #include "Client.h"
 #include "ChatPacket.h"
 
-
-
 int main()
 {
 	WSADATA wsadata;

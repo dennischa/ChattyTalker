@@ -61,6 +61,7 @@ namespace ChattyTalker
 	{
 	public:
 		Lobby();
+		~Lobby();
 		virtual void Run();
 		virtual void Chat(SOCKET socket);
 		ChattyTalker::Server* FindChatroom(RoomType room_type);

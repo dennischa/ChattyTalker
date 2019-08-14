@@ -1,21 +1,5 @@
 #include "Client.h"
 
-BlockTcpClient::BlockTcpClient(SOCKADDR_IN serv_addr)
-{
-	clnt_socket_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (clnt_socket_ == INVALID_SOCKET)
-	{
-		ErrorHandling("BlockTcpClient : Invalid clnt socket", &clnt_socket_);
-	}
-
-	serv_addr_ = serv_addr;
-
-	/*SOCKADDR_IN addr;
-	int addrlen = sizeof(addr);
-	getsockname(clnt_socket_, (SOCKADDR*)& addr, &addrlen);
-	printf("BlockTcpClient : %s\n", toString(addr).c_str());*/
-}
-
 bool BlockTcpClient::Connect()
 {
 	if (connect(clnt_socket_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_)) == SOCKET_ERROR)

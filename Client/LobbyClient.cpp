@@ -2,12 +2,6 @@
 
 LobbyClient::LobbyClient()
 {
-	clnt_socket_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-	if (clnt_socket_ == INVALID_SOCKET)
-	{
-		ErrorHandling("LobbyClient : Invalid socket", &clnt_socket_);
-	}
 	inet_pton(AF_INET, Serv_IPv4_ADDR, &serv_addr_.sin_addr.S_un.S_addr);
 	serv_addr_.sin_port = htons(LOBBY_PORT);
 }
@@ -51,67 +45,47 @@ void LobbyClient::Chat()
 
 			if (chat_packet->get_packet_type() == HOST_INFO)
 			{
-				//make client
 				HostInfoPacket* host_info_packet = (HostInfoPacket*)buf;
 				if (type != host_info_packet->get_room_type())
 				{
-					//Error
 					ErrorHandling("LobbyClient : discordance between host types");
 				}
 
 				SOCKADDR_IN serv_addr = host_info_packet->get_host_addr();
 
-				switch (type)
+				RoomType r_type = (RoomType)type;
+
+				switch (r_type)
 				{
 				case BLOCK_UDP:
+				case NONBLOCK_UDP:
 				{
-					BlockUdpClient blck_udp_clnt(serv_addr);
-					SOCKADDR_IN addr = blck_udp_clnt.get_clnt_addr();
+					UdpClient* udp_ptr = (UdpClient * )MakeClient(r_type, serv_addr);
+					SOCKADDR_IN addr = udp_ptr->get_clnt_addr();
 					
-					HostInfoPacket clnt_info(addr, BLOCK_UDP);
+					HostInfoPacket clnt_info(addr, r_type);
 					send(clnt_socket_, (char*)& clnt_info, sizeof(clnt_info), 0);
 					
-					blck_udp_clnt.Chat();
+					udp_ptr->Chat();
 
-					LeavePacket leave_packet(BLOCK_UDP, addr);
+					LeavePacket leave_packet(r_type, addr);
 					send(clnt_socket_, (char*)& leave_packet, sizeof(leave_packet), 0);
 
+					delete udp_ptr;
+					
 					break;
 				}
 				case BLOCK_TCP:
-				{
-					BlockTcpClient blck_tcp_clnt(serv_addr);
-					
-					if (blck_tcp_clnt.Connect())
-					{
-						blck_tcp_clnt.Chat();
-					}
-
-					break;
-				}
-				case NONBLOCK_UDP:
-				{
-					NonBlockUdpClient nblck_udp_clnt(serv_addr);
-					SOCKADDR_IN addr = nblck_udp_clnt.get_clnt_addr();
-
-					HostInfoPacket clnt_info(addr, NONBLOCK_UDP);
-					send(clnt_socket_, (char*)& clnt_info, sizeof(clnt_info), 0);
-
-					nblck_udp_clnt.Chat();
-
-					LeavePacket leave_packet(NONBLOCK_UDP, addr);
-					send(clnt_socket_, (char*)& leave_packet, sizeof(leave_packet), 0);
-
-					break;
-				}
 				case NONBLOCK_TCP:
 				{
-					NonBlockTcpClient nblck_tcp_clnt(serv_addr);
-
-					if (nblck_tcp_clnt.Connect())
+					TcpClient* tcp_ptr = (TcpClient*)MakeClient(r_type, serv_addr);
+					
+					if (tcp_ptr->Connect())
 					{
-						nblck_tcp_clnt.Chat();
+						tcp_ptr->Chat();
 					}
+
+					delete tcp_ptr;
 
 					break;
 				}
@@ -126,8 +100,42 @@ void LobbyClient::Chat()
 			}
 			else
 			{
-				printf("Wrong Input\n");
+				printf("Wrong Packet\n");
 			}
 		}
+		else
+		{
+			printf("Wrong Input\n");
+		}
 	}
+}
+
+Client* LobbyClient::MakeClient(RoomType type, SOCKADDR_IN addr)
+{
+	Client* clnt_ptr = nullptr;
+	switch (type)
+	{
+	case BLOCK_UDP:
+	{
+		clnt_ptr = new BlockUdpClient(addr);
+		break;
+	}
+	case BLOCK_TCP:
+	{
+		clnt_ptr = new BlockTcpClient(addr);
+		break;
+	}
+	case NONBLOCK_UDP:
+	{
+		clnt_ptr = new NonBlockUdpClient(addr);
+		break;
+	}
+	case NONBLOCK_TCP:
+	{
+		clnt_ptr = new NonBlockTcpClient(addr);
+		break;
+	}
+	}
+
+	return clnt_ptr;
 }

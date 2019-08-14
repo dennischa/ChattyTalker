@@ -1,48 +1,38 @@
 #include "Client.h"
 
-NonBlockTcpClient::NonBlockTcpClient(SOCKADDR_IN serv_addr)
+NonBlockTcpClient::NonBlockTcpClient(SOCKADDR_IN serv_addr): TcpClient(serv_addr)
 {
-	clnt_socket_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (clnt_socket_ == INVALID_SOCKET)
-	{
-		ErrorHandling("BlockTcpClient : Invalid clnt socket", &clnt_socket_);
-	}
-
-	serv_addr_ = serv_addr;
-
 	SetNonBlockMode(clnt_socket_);
 }
 
 bool NonBlockTcpClient::Connect()
 {
-	int result = connect(clnt_socket_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_));
-
-	if (IsWSAEWOULDBLOCK(result))
+	while (true)
 	{
-		FD_SET set;
-		FD_ZERO(&set);
-		FD_SET(clnt_socket_, &set);
-		timeval time;
-		time.tv_sec = 1;
+		int result = connect(clnt_socket_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_));
 
-		while (WSAGetLastError() == WSAEWOULDBLOCK)
+		if (IsWSAEWOULDBLOCK(result))
 		{
-			int s_result = select(0, nullptr, &set, nullptr, &time);
+			int s_result = Select();
 
-			if (s_result > 0)
-			{
-				return true;
-			}
+			if (s_result <= 0)
+				continue;
+		}
+		else if (WSAGetLastError() == WSAEALREADY) //on going
+		{
+			continue;
+		}
+		else if (result == SOCKET_ERROR)
+		{
+			ErrorHandling("NonBlockTcpClient::Connect failed");
 		}
 
-		ErrorHandling("NonBlockTcpClient::Connect failed");
-	}
-	else if (result == SOCKET_ERROR)
-	{
-		ErrorHandling("NonBlockTcpClient::Connect failed");
-	}
+		return true;
 
-	return true;
+	}
+	
+
+	
 }
 
 void NonBlockTcpClient::Chat()
@@ -130,4 +120,15 @@ void NonBlockTcpClient::Recv(bool& on_chat)
 			ErrorHandling("NonBlockTcpClient::Recv : recv failed");
 		}
 	}
+}
+
+int NonBlockTcpClient::Select()
+{
+	FD_SET set;
+	FD_ZERO(&set);
+	FD_SET(clnt_socket_, &set);
+	timeval time;
+	time.tv_sec = 1;
+
+	return select(0, nullptr, &set, nullptr, &time);
 }

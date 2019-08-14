@@ -55,7 +55,7 @@ private:
 class HostInfoPacket : public ChatPacket
 {
 public:
-	HostInfoPacket(SOCKADDR_IN host_addr, RoomType room_type) :ChatPacket(HOST_INFO), host_addr_(host_addr), room_type_(room_type) {}
+	HostInfoPacket(const SOCKADDR_IN host_addr, const RoomType room_type) :ChatPacket(HOST_INFO), host_addr_(host_addr), room_type_(room_type) {}
 	SOCKADDR_IN get_host_addr() { return host_addr_; }
 	RoomType get_room_type() { return room_type_; }
 private:
