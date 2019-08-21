@@ -89,6 +89,18 @@ void LobbyClient::Chat()
 
 					break;
 				}
+				case OVERLLAPED_IO:
+				{
+					OverlappedClient* ov_clnt_ptr = (OverlappedClient*)MakeClient(r_type, serv_addr);
+
+					if (ov_clnt_ptr->Connect())
+					{
+						ov_clnt_ptr->Chat();
+					}
+
+					delete ov_clnt_ptr;
+					break;
+				}
 				default:
 				{
 					ErrorHandling("LobbyClient::Chat : worng room type");
@@ -133,6 +145,11 @@ Client* LobbyClient::MakeClient(RoomType type, SOCKADDR_IN addr)
 	case NONBLOCK_TCP:
 	{
 		clnt_ptr = new NonBlockTcpClient(addr);
+		break;
+	}
+	case OVERLLAPED_IO:
+	{
+		clnt_ptr = new OverlappedClient(addr);
 		break;
 	}
 	}

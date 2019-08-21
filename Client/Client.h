@@ -15,12 +15,10 @@ public:
 	~Client();
 	virtual void Chat() = 0;
 	SOCKET get_clnt_socket() { return clnt_socket_; }
-	SOCKADDR_IN get_clnt_addr();
 
 protected:
 	SOCKET clnt_socket_;
 	SOCKADDR_IN serv_addr_;
-	SOCKADDR_IN clnt_addr_;
 };
 
 class TcpClient : public Client
@@ -32,6 +30,8 @@ public:
 		serv_addr_ = serv_addr;
 	}
 	virtual bool Connect() = 0;
+
+protected:
 	virtual void Recv(bool& on_chat) {};
 
 };
@@ -40,7 +40,11 @@ class UdpClient : public Client
 {
 public:
 	UdpClient(const SOCKADDR_IN serv_addr);
+	SOCKADDR_IN get_clnt_addr();
+
+private:
 	virtual void Recvfrom(bool& on_chat) = 0;
+	SOCKADDR_IN clnt_addr_;
 };
 
 class LobbyClient : public TcpClient
@@ -85,6 +89,19 @@ public:
 	virtual void Chat();
 	virtual void Recv(bool& on_chat);
 	int Select();
+};
+
+class OverlappedClient : public Client
+{
+public:
+	OverlappedClient(const SOCKADDR_IN serv_addr);
+	bool Connect();
+	virtual void Chat();
+
+private:
+	void Recv(bool &on_chat);
+	SocketInfo send_sock_info_;
+	SocketInfo recv_sock_info_;
 };
 
 void ShowGuide();

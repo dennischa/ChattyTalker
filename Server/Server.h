@@ -11,6 +11,7 @@
 #define BLOCK_TCP_PORT 4200
 #define NBLOCK_UDP_PORT 4300
 #define NBLOCK_TCP_PORT 4400
+#define OVERLAPPED_PORT 4500
 
 
 enum ServerState
@@ -101,5 +102,24 @@ namespace ChattyTalker
 		int Select();
 		void Send(SOCKET& socket, char* buf);
 	};
-}
+	
+	class OverlappedServ : public Server
+	{
+	public:
+		OverlappedServ();
+		virtual void Run();
 
+	private:
+		void Chat();
+		//bool Recv(SocketInfo& sock_info);
+		SocketInfo* AddSocketInfo(SOCKET socket);
+		void RemoveSocketInfo(int index);
+		void Send(int index, char* buf, int size);
+
+		SocketInfo sock_infos_[WSA_MAXIMUM_WAIT_EVENTS];
+		WSAEVENT events_[WSA_MAXIMUM_WAIT_EVENTS];
+		int sock_num_;
+		WSAEVENT num_changed_event_;
+		std::mutex mtx_;
+	};
+}

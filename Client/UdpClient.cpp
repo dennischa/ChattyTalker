@@ -11,6 +11,11 @@ UdpClient::UdpClient(SOCKADDR_IN serv_addr)
 
 	serv_addr_ = serv_addr;
 
+	memset(&clnt_addr_, 0, sizeof(clnt_addr_));
+	clnt_addr_.sin_family = AF_INET;
+	clnt_addr_.sin_port = htons(0);
+	inet_pton(AF_INET, Clnt_IPv4_ADDR, &clnt_addr_.sin_addr.S_un.S_addr);
+
 	if (bind(clnt_socket_, (SOCKADDR*)& clnt_addr_, sizeof(clnt_addr_)) == SOCKET_ERROR)
 	{
 		ErrorHandling("UdpClient::UdpClient : binding socket failed", &clnt_socket_);

@@ -20,9 +20,18 @@ enum RoomType
 	BLOCK_TCP = 2,
 	NONBLOCK_UDP = 3,
 	NONBLOCK_TCP =4,
-	EPOLL = 5,
-	OVERLLAPED = 6,
-	IOCP =7
+	OVERLLAPED_IO = 5,
+	IOCP =6
+};
+
+struct SocketInfo
+{
+	OVERLAPPED ovelapped;
+	SOCKET socket;
+	WSABUF wsabuf;
+	char buf[MAX_PACKET_SIZE];
+	DWORD bytes;
+	DWORD flag;
 };
 
 class ChatPacket
@@ -76,3 +85,4 @@ private:
 };
 
 bool GetPacketType(char* buf, PacketType& packet_type);
+bool InitSocketInfo(SocketInfo* sock_info_ptr, SOCKET socket);

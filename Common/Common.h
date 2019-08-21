@@ -4,9 +4,11 @@
 #include <WS2tcpip.h>
 #include <string>
 #include <functional>
+#include <utility> 
 
 #define Serv_IPv4_ADDR "127.0.0.1"
 #define LOBBY_PORT 4000
+#define SEND_TIMEOUT 1000
 
 void ErrorHandling(const char* message, SOCKET* socket = nullptr);
 std::string toString(SOCKADDR_IN& addr);

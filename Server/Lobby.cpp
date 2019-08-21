@@ -108,6 +108,7 @@ void Lobby::Chat(SOCKET socket)
 			}
 			case BLOCK_TCP:
 			case NONBLOCK_TCP:
+			case OVERLLAPED_IO:
 			{
 				//send serv info
 				HostInfoPacket serv_info(serv->get_serv_addr(), room_type);
@@ -171,6 +172,9 @@ Server* Lobby::FindChatroom(const RoomType room_type)
 			break;
 		case NONBLOCK_TCP:
 			server = new NonBlockTcpServ;
+			break;
+		case OVERLLAPED_IO:
+			server = new OverlappedServ;
 			break;
 		default:
 			ErrorHandling("Lobby::FindChatroom : Add Chat Room Type");

@@ -7,32 +7,28 @@ NonBlockTcpClient::NonBlockTcpClient(SOCKADDR_IN serv_addr): TcpClient(serv_addr
 
 bool NonBlockTcpClient::Connect()
 {
-	while (true)
+	int result = connect(clnt_socket_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_));
+	
+	if (IsWSAEWOULDBLOCK(result))
 	{
-		int result = connect(clnt_socket_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_));
-
-		if (IsWSAEWOULDBLOCK(result))
+		while (true)
 		{
 			int s_result = Select();
-
-			if (s_result <= 0)
+			
+			if (s_result > 0)
+				return true;
+			else if (s_result == 0)
 				continue;
+			else
+				ErrorHandling("NonBlockTcpClient::Connect : failed Select");
 		}
-		else if (WSAGetLastError() == WSAEALREADY) //on going
-		{
-			continue;
-		}
-		else if (result == SOCKET_ERROR)
-		{
-			ErrorHandling("NonBlockTcpClient::Connect failed");
-		}
-
-		return true;
-
 	}
-	
+	else if (result == SOCKET_ERROR)
+	{
+		ErrorHandling("NonBlockTcpClient::Connect() failed");
+	}
 
-	
+	return true;
 }
 
 void NonBlockTcpClient::Chat()
@@ -76,13 +72,14 @@ void NonBlockTcpClient::Chat()
 		}
 	}
 
-	closesocket(clnt_socket_);
 	on_chat = false;
 
 	if (recv.joinable())
 	{
 		recv.join();
 	}
+
+	closesocket(clnt_socket_);
 }
 
 void NonBlockTcpClient::Recv(bool& on_chat)

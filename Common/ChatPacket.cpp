@@ -16,3 +16,28 @@ bool GetPacketType(char* buf, PacketType& packet_type)
 	packet_type = type;
 	return true;
 }
+
+bool InitSocketInfo(SocketInfo* ptr, SOCKET socket)
+{
+	if (ptr == nullptr)
+		return false;
+
+	if(ptr->socket != socket)
+		ptr->socket = socket;
+
+	memset(&(ptr->ovelapped), 0, sizeof(OVERLAPPED));
+	ptr->ovelapped.hEvent = WSACreateEvent();
+	if (ptr->ovelapped.hEvent == WSA_INVALID_EVENT)
+	{
+		return false;
+	}
+
+	memset(ptr->buf, 0, MAX_PACKET_SIZE);
+	ptr->wsabuf.len = MAX_PACKET_SIZE;
+	ptr->wsabuf.buf = ptr->buf;
+	
+	ptr->bytes = 0;
+	ptr->flag = 0;
+
+	return true;
+}
