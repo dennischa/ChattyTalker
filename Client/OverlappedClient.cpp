@@ -12,12 +12,12 @@ OverlappedClient::OverlappedClient(const SOCKADDR_IN serv_addr)
 
 	if (InitSocketInfo(&send_sock_info_, clnt_socket_) == FALSE)
 	{
-		ErrorHandling("OverlappedClient::OverlappedClient : faile InitSocketInfo send_sock_info_", &clnt_socket_);
+		ErrorHandling("OverlappedClient::OverlappedClient : Failed InitSocketInfo send_sock_info_", &clnt_socket_);
 	}
 
 	if (InitSocketInfo(&recv_sock_info_, clnt_socket_) == FALSE)
 	{
-		ErrorHandling("OverlappedClient::OverlappedClient : faile InitSocketInfo recv_sock_info_", &clnt_socket_);
+		ErrorHandling("OverlappedClient::OverlappedClient : Failed InitSocketInfo recv_sock_info_", &clnt_socket_);
 	}
 }
 
@@ -25,7 +25,7 @@ bool OverlappedClient::Connect()
 {
 	if (connect(clnt_socket_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_)) == SOCKET_ERROR)
 	{
-		ErrorHandling("OverlappedClient::Connect : faile connect", &clnt_socket_);
+		ErrorHandling("OverlappedClient::Connect : Failed connect", &clnt_socket_);
 		return false;
 	}
 
@@ -112,7 +112,6 @@ void OverlappedClient::Recv(bool& on_chat)
 					ErrorHandling("OverlappedClient::Recv : failed WSAGetOverlappedResult");
 				}
 
-				//ChatPacket* chat_packet = (ChatPacket * )recv_sock_info_.buf;
 				PacketType type;
 				GetPacketType(recv_sock_info_.buf, type);
 
@@ -122,6 +121,7 @@ void OverlappedClient::Recv(bool& on_chat)
 				}
 
 				MessagePacket* msg_packet = (MessagePacket*)recv_sock_info_.buf;
+
 				printf("%s\n", msg_packet->get_message());
 			}
 		}

@@ -25,15 +25,11 @@ class TcpClient : public Client
 {
 public:
 	TcpClient();
-	TcpClient(const SOCKADDR_IN serv_addr) :TcpClient()
-	{
-		serv_addr_ = serv_addr;
-	}
+	TcpClient(const SOCKADDR_IN serv_addr) :TcpClient() { serv_addr_ = serv_addr; }
 	virtual bool Connect() = 0;
 
-protected:
+private:
 	virtual void Recv(bool& on_chat) {};
-
 };
 
 class UdpClient : public Client
@@ -53,6 +49,8 @@ public:
 	LobbyClient();
 	virtual bool Connect();
 	virtual void Chat();
+
+private:
 	Client* MakeClient(RoomType type, SOCKADDR_IN addr);
 };
 
@@ -61,6 +59,8 @@ class BlockUdpClient : public UdpClient
 public:
 	BlockUdpClient(const SOCKADDR_IN serv_addr) : UdpClient(serv_addr) {}
 	virtual void Chat();
+
+private:
 	virtual void Recvfrom(bool& on_chat);
 };
 
@@ -70,6 +70,8 @@ public:
 	BlockTcpClient(SOCKADDR_IN serv_addr) : TcpClient(serv_addr) {}
 	virtual bool Connect();
 	virtual void Chat();
+
+private:
 	void Recv(bool& on_chat);
 };
 
@@ -78,6 +80,8 @@ class NonBlockUdpClient : public UdpClient
 public:
 	NonBlockUdpClient(const SOCKADDR_IN serv_addr);
 	virtual void Chat();
+
+private:
 	virtual void Recvfrom(bool& on_chat);
 };
 
@@ -87,6 +91,8 @@ public:
 	NonBlockTcpClient(SOCKADDR_IN serv_addr);
 	virtual bool Connect();
 	virtual void Chat();
+
+private:
 	virtual void Recv(bool& on_chat);
 	int Select();
 };

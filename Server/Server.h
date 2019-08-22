@@ -44,6 +44,7 @@ namespace ChattyTalker
 		TcpServer();
 		virtual void Stop();
 		virtual void Chat(SOCKET socket = NULL) = 0;
+
 	protected:
 		std::map<SOCKET, SOCKADDR_IN> clnt_socks_;
 	};
@@ -52,8 +53,9 @@ namespace ChattyTalker
 	{
 	public:
 		UdpServer();
-		virtual bool Join(SOCKADDR_IN addr);
-		virtual bool Leave(SOCKADDR_IN addr);
+		bool Join(SOCKADDR_IN addr);
+		bool Leave(SOCKADDR_IN addr);
+
 	protected:
 		std::vector<SOCKADDR_IN> clnt_addrs_;
 	};
@@ -90,7 +92,7 @@ namespace ChattyTalker
 	{
 	public:
 		NonBlockUdpServ();
-		void Run();
+		virtual void Run();
 	};
 
 	class NonBlockTcpServ : public TcpServer
@@ -99,6 +101,8 @@ namespace ChattyTalker
 		NonBlockTcpServ();
 		virtual void Run();
 		virtual void Chat(SOCKET socke);
+
+	private:
 		int Select();
 		void Send(SOCKET& socket, char* buf);
 	};
@@ -111,7 +115,6 @@ namespace ChattyTalker
 
 	private:
 		void Chat();
-		//bool Recv(SocketInfo& sock_info);
 		SocketInfo* AddSocketInfo(SOCKET socket);
 		void RemoveSocketInfo(int index);
 		void Send(int index, char* buf, int size);

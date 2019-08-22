@@ -16,7 +16,7 @@ OverlappedServ::OverlappedServ()
 
 	if (bind(serv_sock_, (SOCKADDR*)& serv_addr_, sizeof(serv_addr_)) == SOCKET_ERROR)
 	{
-		ErrorHandling("OverlappedServ::OverlappedServ : Binding serv_sock failed", &serv_sock_);
+		ErrorHandling("OverlappedServ::OverlappedServ : Failed binding serv_sock" , &serv_sock_);
 	}
 
 	memset(sock_infos_, 0, sizeof(sock_infos_));
@@ -25,7 +25,7 @@ OverlappedServ::OverlappedServ()
 	num_changed_event_ = WSACreateEvent();
 	if (num_changed_event_ == WSA_INVALID_EVENT)
 	{
-		ErrorHandling("OverlappedServ::OverlappedServ(): Invalid num_changed_event");
+		ErrorHandling("OverlappedServ::OverlappedServ : Invalid num_changed_event");
 	}
 
 	sock_num_ = 0;
@@ -34,12 +34,11 @@ OverlappedServ::OverlappedServ()
 
 void OverlappedServ::Run()
 {
-	const int buf_count = 1;
 	serv_state_ = RUNNING;
 
 	if (listen(serv_sock_, SOMAXCONN) == SOCKET_ERROR)
 	{
-		ErrorHandling("OverlappedServ::Run() : Listening serv_socket failed", &serv_sock_);
+		ErrorHandling("OverlappedServ::Run : Listening serv_socket failed", &serv_sock_);
 	}
 
 	std::thread chat(&OverlappedServ::Chat, this);
@@ -54,22 +53,25 @@ void OverlappedServ::Run()
 
 		if (accp_sock == INVALID_SOCKET)
 		{
-			ErrorHandling("OverlappedServ::Run() : invalid accp_sock");
+			if (WSAGetLastError() == WSAECONNRESET)
+				break;
+
+			ErrorHandling("OverlappedServ::Run : Invalid accp_sock");
 		}
 
 		SocketInfo* sock_info_ptr = AddSocketInfo(accp_sock);
 
 		if (sock_info_ptr == nullptr)
 		{
-			ErrorHandling("OverlappedServ::Run() : failed AddSocketInfo", &accp_sock);
+			ErrorHandling("OverlappedServ::Run : Failed AddSocketInfo", &accp_sock);
 		}
 
-		int result = WSARecv(sock_info_ptr->socket, &(sock_info_ptr->wsabuf), buf_count, &(sock_info_ptr->bytes), &(sock_info_ptr->flag), &(sock_info_ptr->ovelapped), NULL);
+		int result = WSARecv(sock_info_ptr->socket, &(sock_info_ptr->wsabuf), 1, &(sock_info_ptr->bytes), &(sock_info_ptr->flag), &(sock_info_ptr->ovelapped), NULL);
 
 		if (result == SOCKET_ERROR)
 		{
 			if (WSAGetLastError() != WSA_IO_PENDING)
-				ErrorHandling("OverlappedServ::Run() : failed WSARecv");
+				ErrorHandling("OverlappedServ::Run : failed WSARecv");
 		}
 
 		WSASetEvent(num_changed_event_);
@@ -89,13 +91,12 @@ void OverlappedServ::Chat()
 
 		if (index == 0)
 		{
-			//num_changed_event_
 			WSAResetEvent(num_changed_event_);
 			continue;
 		}
 		else if (index >= WSA_MAXIMUM_WAIT_EVENTS)
 		{
-			ErrorHandling("OverlappedServ::Chat() : Wrong Index");
+			ErrorHandling("OverlappedServ::Chat : Wrong Index");
 		}
 
 		SocketInfo* ptr = &sock_infos_[index];
@@ -111,22 +112,20 @@ void OverlappedServ::Chat()
 				continue;
 			}
 			else
-				ErrorHandling("OverlappedServ::Chat() : failed WSAGetOverlappedResult");
+				ErrorHandling("OverlappedServ::Chat : Failed WSAGetOverlappedResult");
 		}
 
-		if (transfered == 0)
+		if (transfered == 0) //lose connection
 		{
 			RemoveSocketInfo(index);
 			continue;
 		}
-
-		printf("Received %ld bytes\n", transfered);
 			
 		Send(index, ptr->buf, sizeof(ptr->buf));
-		//Reset
+		
 		InitSocketInfo(ptr, ptr->socket);
 		events_[index] = ptr->ovelapped.hEvent;
-		//Recv
+		
 		WSARecv(ptr->socket, &ptr->wsabuf, 1, &ptr->bytes, &ptr->flag, &ptr->ovelapped, NULL);
 	}
 }
@@ -134,6 +133,7 @@ void OverlappedServ::Chat()
 SocketInfo* OverlappedServ::AddSocketInfo(SOCKET socket)
 {
 	mtx_.lock();
+
 	if (sock_num_ >= WSA_MAXIMUM_WAIT_EVENTS)
 	{
 		mtx_.unlock();
