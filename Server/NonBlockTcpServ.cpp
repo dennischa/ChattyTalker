@@ -119,8 +119,9 @@ int NonBlockTcpServ::Select()
 {
 	FD_SET set;
 	FD_ZERO(&set);
-	timeval time;
-	time.tv_sec = 1;
+	TIMEVAL time;
+	memset(&time, 0, sizeof(time));
+	time.tv_sec = 10;
 
 	std::map<SOCKET, SOCKADDR_IN>::iterator it = clnt_socks_.begin();
 
@@ -153,7 +154,7 @@ void NonBlockTcpServ::Send(SOCKET& socket, char* buf)
 				{
 					continue;
 				}
-
+				
 				break;
 			}
 			

@@ -127,7 +127,7 @@ void OverlappedServ::Chat()
 		events_[index] = ptr->ovelapped.hEvent;
 		
 		WSARecv(ptr->socket, &ptr->wsabuf, 1, &ptr->bytes, &ptr->flag, &ptr->ovelapped, NULL);
-	}
+	}  
 }
 
 SocketInfo* OverlappedServ::AddSocketInfo(SOCKET socket)

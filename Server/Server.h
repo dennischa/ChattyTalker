@@ -12,6 +12,7 @@
 #define NBLOCK_UDP_PORT 4300
 #define NBLOCK_TCP_PORT 4400
 #define OVERLAPPED_PORT 4500
+#define IOCP_PORT 4600
 
 
 enum ServerState
@@ -124,5 +125,19 @@ namespace ChattyTalker
 		int sock_num_;
 		WSAEVENT num_changed_event_;
 		std::mutex mtx_;
+	};
+
+	class IOCPServ : public Server
+	{
+	public:
+		IOCPServ();
+		~IOCPServ();
+		virtual void Run();
+		void Chat();
+		void Send(SOCKET sock, char* buf);
+
+	private:
+		HANDLE completion_port_;
+		std::map<SOCKET, SocketInfo*> sock_infos_;
 	};
 }

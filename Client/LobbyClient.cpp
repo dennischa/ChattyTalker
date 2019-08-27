@@ -90,6 +90,7 @@ void LobbyClient::Chat()
 					break;
 				}
 				case OVERLLAPED_IO:
+				case IOCP:
 				{
 					OverlappedClient* ov_clnt_ptr = (OverlappedClient*)MakeClient(r_type, serv_addr);
 
@@ -148,6 +149,7 @@ Client* LobbyClient::MakeClient(RoomType type, SOCKADDR_IN addr)
 		break;
 	}
 	case OVERLLAPED_IO:
+	case IOCP:
 	{
 		clnt_ptr = new OverlappedClient(addr);
 		break;

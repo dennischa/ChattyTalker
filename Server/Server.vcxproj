@@ -158,6 +158,7 @@
   <ItemGroup>
     <ClCompile Include="BlockTcpServ.cpp" />
     <ClCompile Include="BlockUdpServ.cpp" />
+    <ClCompile Include="IOCPServ.cpp" />
     <ClCompile Include="Lobby.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NonBlockTcpServ.cpp" />
