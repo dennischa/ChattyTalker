@@ -21,4 +21,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)ChatPacket.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\README.md" />
+  </ItemGroup>
 </Project>
