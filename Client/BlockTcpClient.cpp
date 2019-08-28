@@ -57,16 +57,11 @@ void BlockTcpClient::Recv(bool& on_chat)
 
 		if (r < 0)
 		{
-			printf("Disconnet from Server");
+			printf("BlockTcpClient : Disconnet from Server\n");
 			on_chat = false;
 			return;
 		}
 
-		PacketType packet_type;
-		if (GetPacketType(buf, packet_type) == MESSAGE)
-		{
-			MessagePacket* msg_packet = (MessagePacket*)buf;
-			printf("%s\n", msg_packet->get_message());
-		}
+		PrintMsg(buf);
 	}
 }

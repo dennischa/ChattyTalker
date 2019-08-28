@@ -51,8 +51,6 @@ void NonBlockTcpServ::Run()
 		}
 
 		clnt_socks_[accp_sock] = clnt_addr;
-
-		printf("NonBlockTcpServ : Accept Client Connect : %s\n", toString(clnt_addr).c_str());
 	}
 
 	if (chat.joinable())

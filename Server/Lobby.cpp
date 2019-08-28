@@ -40,18 +40,14 @@ void Lobby::Run()
 		accp_sock = accept(serv_sock_, (SOCKADDR*)& clnt_addr, &addrlen);
 		if (accp_sock == INVALID_SOCKET)
 		{
-			ErrorHandling("Lobby: Invalid accp_socket", &accp_sock);
+			ErrorHandling("Lobby : Invalid accp_socket", &accp_sock);
 		}
 
+		printf("Lobby : Connected from : %s\n", toString(clnt_addr).c_str());
 		clnt_socks_[accp_sock] = clnt_addr;
-		
-		printf("Lobby : Accept Client Connect : %s\n", toString(clnt_addr).c_str());
 
-		//클라이언트랑 대화하는 쓰레드 생성
-		//std::thread lobby_chat([&]() {Chat(accp_sock); });
 		std::thread lobby_chat(&Lobby::Chat, this, accp_sock);
 		threads.push_back(std::move(lobby_chat));
-		//lobby_chat.detach();
 	}
 }
 
@@ -188,6 +184,8 @@ Server* Lobby::FindChatroom(const RoomType room_type)
 
 		std::thread run(&Server::Run, server);
 		threads.push_back(move(run));
+
+		printf("Lobby::FindChatroom : Run Server, Type Num : %d\n", (int)room_type);
 	}
 
 	return chat_rooms_[room_type];

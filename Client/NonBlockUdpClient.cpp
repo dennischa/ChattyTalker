@@ -66,12 +66,7 @@ void NonBlockUdpClient::Recvfrom(bool& on_chat)
 
 		if (result > 0)
 		{
-			PacketType packet_type;
-			if (GetPacketType(buf, packet_type) && packet_type == MESSAGE)
-			{
-				MessagePacket* msg_packet = (MessagePacket*)buf;
-				printf("%s\n", msg_packet->get_message());
-			}
+			PrintMsg(buf);
 		}
 		else if(IsWSAEWOULDBLOCK(result))
 		{

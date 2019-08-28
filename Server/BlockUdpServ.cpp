@@ -14,8 +14,6 @@ BlockUdpServ::BlockUdpServ()
 
 void BlockUdpServ::Run()
 {
-	printf("BlockUdpServ::Run() Start\n");
-
 	serv_state_ = RUNNING;
 	
 	char buf[MAX_PACKET_SIZE];
@@ -28,8 +26,6 @@ void BlockUdpServ::Run()
 		memset(buf, 0, sizeof(buf));
 
 		int r = recvfrom(serv_sock_, buf, sizeof(buf), 0, (SOCKADDR*)&clnt_addr, &addrlen);
-		
-		printf("recvfrom : %s\n", toString(clnt_addr).c_str());
 
 		ChatPacket* chat_packet = (ChatPacket*)buf;
 
@@ -41,7 +37,6 @@ void BlockUdpServ::Run()
 				if ((clnt_addr.sin_addr.S_un.S_addr != addr.sin_addr.S_un.S_addr) || (clnt_addr.sin_port != addr.sin_port))
 				{
 					sendto(serv_sock_, buf, sizeof(buf), 0, (SOCKADDR*)&addr, sizeof(addr));
-					printf("BlockUdpSe sendto : %s\n", toString(addr).c_str());
 				}
 			}
 		}

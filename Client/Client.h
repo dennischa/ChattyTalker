@@ -111,3 +111,4 @@ private:
 };
 
 void ShowGuide();
+void PrintMsg(char* buf);

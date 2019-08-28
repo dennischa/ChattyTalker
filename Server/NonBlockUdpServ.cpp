@@ -16,8 +16,6 @@ NonBlockUdpServ::NonBlockUdpServ()
 
 void NonBlockUdpServ::Run()
 {
-	printf("NonBlockUdpServ::Run() Start\n");
-
 	serv_state_ = RUNNING;
 
 	char buf[MAX_PACKET_SIZE];
@@ -41,8 +39,6 @@ void NonBlockUdpServ::Run()
 			ErrorHandling("NonBlockUdpServ::Run : recvfrom failed");
 		}
 
-		printf("recvfrom : %s\n", toString(clnt_addr).c_str());
-
 		ChatPacket* chat_packet = (ChatPacket*)buf;
 
 		if (chat_packet->get_packet_type() == MESSAGE)
@@ -53,7 +49,6 @@ void NonBlockUdpServ::Run()
 				if ((clnt_addr.sin_addr.S_un.S_addr != addr.sin_addr.S_un.S_addr) || (clnt_addr.sin_port != addr.sin_port))
 				{
 					sendto(serv_sock_, buf, sizeof(buf), 0, (SOCKADDR*)& addr, sizeof(addr));
-					printf("NonBlockUdpServ::Run : sendto %s\n", toString(addr).c_str());
 				}
 			}
 		}

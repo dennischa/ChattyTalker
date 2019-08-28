@@ -2,9 +2,7 @@
 
 void BlockUdpClient::Chat()
 {
-	//printf("BlockUdpClient::Chat() Start\n");
 	bool on_chat = true;
-	//std::thread recvfrom([&]() { Recvfrom(on_chat); });
 	std::thread recvfrom(&BlockUdpClient::Recvfrom, this, std::ref(on_chat));
 
 	char message[MAX_MESSAGE_SIZE];
@@ -44,14 +42,12 @@ void BlockUdpClient::Recvfrom(bool& on_chat)
 
 		if (r < 0)
 		{
-			return;
+			if (WSAGetLastError() == WSAEINTR)
+				return;
+			else
+				ErrorHandling("BlockUdpClient::Recvfrom : Failed recvfrom");
 		}
 
-		PacketType packet_type;
-		if (GetPacketType(buf, packet_type) && packet_type == MESSAGE)
-		{
-			MessagePacket* msg_packet = (MessagePacket*)buf;
-			printf("%s\n", msg_packet->get_message());
-		}
+		PrintMsg(buf);
 	}
 }

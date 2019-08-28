@@ -67,7 +67,7 @@ void OverlappedClient::Chat()
 				
 				if (result == WSA_WAIT_TIMEOUT)
 				{
-					printf("OverlappedClient::Chat() : WSASend TIMEOUT");
+					printf("OverlappedClient::Chat : WSASend TIMEOUT");
 				}
 			}
 			else
@@ -112,17 +112,7 @@ void OverlappedClient::Recv(bool& on_chat)
 					ErrorHandling("OverlappedClient::Recv : failed WSAGetOverlappedResult");
 				}
 
-				PacketType type;
-				GetPacketType(recv_sock_info_.buf, type);
-
-				if (type != MESSAGE)
-				{
-					ErrorHandling("OverlappedClient::Recv : Wrong packet type");
-				}
-
-				MessagePacket* msg_packet = (MessagePacket*)recv_sock_info_.buf;
-
-				printf("%s\n", msg_packet->get_message());
+				PrintMsg(recv_sock_info_.buf);
 			}
 		}
 		else

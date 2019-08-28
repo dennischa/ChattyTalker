@@ -32,7 +32,7 @@ void LobbyClient::Chat()
 
 		if (type > 0 && type < 8)
 		{
-			printf("Lobby: Join %d\n", type);
+			printf("LobbyClient : Join Type : %d\n", type);
 			JoinPacket joinPacket((RoomType)type);
 			send(clnt_socket_, (const char*)& joinPacket, sizeof(joinPacket), 0);
 
@@ -104,7 +104,7 @@ void LobbyClient::Chat()
 				}
 				default:
 				{
-					ErrorHandling("LobbyClient::Chat : worng room type");
+					ErrorHandling("LobbyClient::Chat : Wrong room type");
 					break;
 				}
 				}
@@ -113,12 +113,12 @@ void LobbyClient::Chat()
 			}
 			else
 			{
-				printf("Wrong Packet\n");
+				ErrorHandling("LobbyClient::Chat : Wrong packet\n");
 			}
 		}
 		else
 		{
-			printf("Wrong Input\n");
+			printf("LobbyClient : Wrong Input\n");
 		}
 	}
 }

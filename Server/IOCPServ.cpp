@@ -105,7 +105,7 @@ void IOCPServ::Chat()
 		}
 
 		SocketInfo* ptr= sock_infos_[clnt_sock];
-
+		
 		Send(clnt_sock, ptr->buf);
 
 		InitSocketInfo(ptr, clnt_sock);

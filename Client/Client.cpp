@@ -38,3 +38,15 @@ void ShowGuide()
 
 	in.close();
 }
+
+void PrintMsg(char* buf)
+{
+	PacketType packet_type;
+	if (GetPacketType(buf, packet_type) != MESSAGE)
+	{
+		printf("Error : ! Not Message Packet\n");
+		return;
+	}
+	
+	printf("Recv Message : %s \n", ((MessagePacket*)buf)->get_message());
+}

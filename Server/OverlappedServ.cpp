@@ -120,7 +120,7 @@ void OverlappedServ::Chat()
 			RemoveSocketInfo(index);
 			continue;
 		}
-			
+
 		Send(index, ptr->buf, sizeof(ptr->buf));
 		
 		InitSocketInfo(ptr, ptr->socket);
@@ -197,7 +197,7 @@ void OverlappedServ::Send(int index, char* buf, int size)
 
 					if (result == WSA_WAIT_TIMEOUT)
 					{
-						printf("OverlappedClient::Chat() : WSASend TIMEOUT");
+						printf("OverlappedServ::Send : WSASend TIMEOUT");
 					}
 				}
 				else

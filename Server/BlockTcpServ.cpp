@@ -35,10 +35,6 @@ void BlockTcpServ::Run()
 
 		clnt_socks_[accp_sock] = clnt_addr;
 
-		printf("BlockTcpServ : Accept Client Connect : %s\n", toString(clnt_addr).c_str());
-
-		//클라이언트랑 대화하는 쓰레드 생성
-		//std::thread chat([&]() { Chat(accp_sock); });
 		std::thread chat(&BlockTcpServ::Chat, this, accp_sock);
 		threads.push_back(std::move(chat));
 	}
@@ -63,7 +59,6 @@ void BlockTcpServ::Chat(SOCKET socket)
 
 			return;
 		}
-
 		PacketType packet_type;
 		
 		if (GetPacketType(buf, packet_type))
