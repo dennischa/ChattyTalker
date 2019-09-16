@@ -24,4 +24,7 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)..\README.md" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="$(MSBuildThisFileDirectory)ChattyTalker.png" />
+  </ItemGroup>
 </Project>

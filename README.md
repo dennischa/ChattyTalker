@@ -9,7 +9,8 @@
      6. IOCP
 ## 주요 순서도
 
-## 시연 영상
+## 스크린샷
+![ChattyTalker.png](./Common/ChattyTalker.png)
 
 ## 클래스 구조
 
