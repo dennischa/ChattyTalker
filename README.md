@@ -8,12 +8,15 @@
      5. Overllapped I/O
      6. IOCP
 ## 주요 순서도
-![flowchart.png](./image/flowchart.png)
+![flowchart.png](./image/flowchart.PNG)
 
 ## 스크린샷
 ![ChattyTalker.png](./Common/ChattyTalker.png)
 
 ## 클래스 구조
+![class_structure_1.PNG](./image/class_structure_1.PNG)
+![class_structure_2.PNG](./image/class_structure_2.PNG)
+
 
 ## 개발 환경
 
