@@ -19,5 +19,10 @@
 
 
 ## 개발 환경
-
+* 언어 : C++
+* 편집기 : Visual Studio Commnity 2019
+* 링커 추가종속성 : ws2_32.lib (Winsock)
+* 프로젝트
+  * 콘솔 앱 : [Client](./Client/), [Server](./Server/)
+  * 참조(공용) 프로젝트: [Common](./Common/)
 
