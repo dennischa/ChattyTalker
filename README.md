@@ -8,6 +8,7 @@
      5. Overllapped I/O
      6. IOCP
 ## 주요 순서도
+![flowchart.png](./image/flowchart.png)
 
 ## 스크린샷
 ![ChattyTalker.png](./Common/ChattyTalker.png)
